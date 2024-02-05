@@ -2,7 +2,7 @@ import streamlit as st
 from PIL import Image
 import base64
 
-logo = "D:/streamlit/paperpalooza/images/paperpalooza.png"
+logo = "./images/paperpalooza.png"
 image = Image.open(logo)
 
 # Function to convert image to Base64
