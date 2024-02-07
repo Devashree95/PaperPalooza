@@ -49,16 +49,31 @@ def format_citation(selected_paper, citation_format, document_type):
     page = selected_paper['page'] if 'page' in selected_paper else ''
     source = selected_paper['source'] if 'source' in selected_paper else ''
 
+    if len(authors) == 1:
+        formatted_authors = f"{authors[0]['family']}, {authors[0]['given']}."
+    elif len(authors) == 2:
+        formatted_authors = f"{authors[0]['family']}, {authors[0]['given']} and {authors[1]['family']}, {authors[1]['given']}."
+    else:
+        formatted_authors = ', '.join([f"{author['family']}, {author['given']}." for author in authors[:-1]]) + f", and {authors[-1]['family']}, {authors[-1]['given']}."
+
     
     if document_type == 'Journal Article':
         if citation_format == 'APA':
             # Format the citation in APA style 
-            citation = f"{' and '.join([author['family'] + ', ' + author['given'][0] + '. ' for author in authors])} ({selected_paper['issued']['date-parts'][0][0]}). {title}. {container_title[0]}, {volume}, {page}. https://doi.org/{doi}"
+            if len(authors) == 1:
+                formatted_authors = f"{authors[0]['family']}, {authors[0]['given'][0]}."
+            elif len(authors) == 2:
+                formatted_authors = f"{authors[0]['family']}, {authors[0]['given'][0]} & {authors[1]['family']}, {authors[1]['given'][0]}."
+            else:
+                formatted_authors = ', '.join([f"{author['family']}, {author['given'][0]}." for author in authors[:-1]]) + f", & {authors[-1]['family']}, {authors[-1]['given'][0]}."
+
+
+            citation = f"{formatted_authors} ({selected_paper['issued']['date-parts'][0][0]}). {title}. {container_title[0]}, {volume}, {page}. https://doi.org/{doi}"
         elif citation_format == 'MLA':
             # Format the citation in MLA style (placeholder)
-            citation = f"{' and '.join([author['family'] +', '+ author['given']  for author in authors])}. \"{title}.\" {container_title[0]}, vol.{volume}, {publisher}, {selected_paper['issued']['date-parts'][0][0]}, pp. {page}. {source}, https://doi.org/{doi}"
+            citation = f"{formatted_authors}. \"{title}.\" {container_title[0]}, vol.{volume}, {publisher}, {selected_paper['issued']['date-parts'][0][0]}, pp. {page}. {source}, https://doi.org/{doi}"
         elif citation_format == 'Chicago':
-            citation = f"{' and '.join([author['family'] +', '+ author['given']  for author in authors])}. \"{title}.\" {container_title[0]} {volume} ({selected_paper['issued']['date-parts'][0][0]}): {page}. https://doi.org/{doi}"
+            citation = f"{formatted_authors}. \"{title}.\" {container_title[0]} {volume} ({selected_paper['issued']['date-parts'][0][0]}): {page}. https://doi.org/{doi}"
         else:
             citation = "Citation format not supported."
     elif document_type == 'Book':
