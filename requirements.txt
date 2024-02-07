@@ -6,3 +6,4 @@ pyzotero==1.5.18
 Requests==2.31.0
 services==0.1.1
 streamlit==1.25.0
+python-dotenv
