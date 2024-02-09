@@ -2,6 +2,7 @@ import streamlit as st
 import helpers.sidebar
 import requests
 import streamlit.components.v1 as components
+from datetime import datetime
 
 
 helpers.sidebar.show()
@@ -48,6 +49,7 @@ def format_citation(selected_paper, citation_format, document_type):
     volume = selected_paper['volume'] if 'volume' in selected_paper else ''
     page = selected_paper['page'] if 'page' in selected_paper else ''
     source = selected_paper['source'] if 'source' in selected_paper else ''
+    publisher_location = selected_paper['publisher-location'] if 'publisher-location' in selected_paper else ''
 
     if len(authors) == 1:
         formatted_authors = f"{authors[0]['family']}, {authors[0]['given']}."
@@ -68,12 +70,12 @@ def format_citation(selected_paper, citation_format, document_type):
                 formatted_authors = ', '.join([f"{author['family']}, {author['given'][0]}." for author in authors[:-1]]) + f", & {authors[-1]['family']}, {authors[-1]['given'][0]}."
 
 
-            citation = f"{formatted_authors} ({selected_paper['issued']['date-parts'][0][0]}). {title}. {container_title[0]}, {volume}, {page}. https://doi.org/{doi}"
+            citation = f"{formatted_authors} ({selected_paper['issued']['date-parts'][0][0]}). {title}. {container_title[0]}, {volume}, {page}. https://doi.org/{doi}."
         elif citation_format == 'MLA':
             # Format the citation in MLA style (placeholder)
-            citation = f"{formatted_authors}. \"{title}.\" {container_title[0]}, vol.{volume}, {publisher}, {selected_paper['issued']['date-parts'][0][0]}, pp. {page}. {source}, https://doi.org/{doi}"
+            citation = f"{formatted_authors}. \"{title}.\" {container_title[0]}, vol.{volume}, {publisher}, {selected_paper['issued']['date-parts'][0][0]}, pp. {page}. {source}, https://doi.org/{doi}."
         elif citation_format == 'Chicago':
-            citation = f"{formatted_authors}. \"{title}.\" {container_title[0]} {volume} ({selected_paper['issued']['date-parts'][0][0]}): {page}. https://doi.org/{doi}"
+            citation = f"{formatted_authors}. \"{title}.\" {container_title[0]} {volume} ({selected_paper['issued']['date-parts'][0][0]}): {page}. https://doi.org/{doi}."
         else:
             citation = "Citation format not supported."
     elif document_type == 'Book':
@@ -99,25 +101,42 @@ def format_citation(selected_paper, citation_format, document_type):
                 formatted_editors = ', '.join([f"{editor['family']}, {editor['given'][0]}." for editor in editors[:-1]]) + f", & {editors[-1]['family']}, {editors[-1]['given'][0]}."
 
             # Format the citation in APA style (placeholder)
-            citation = f"{formatted_editors} ({selected_paper['issued']['date-parts'][0][0]}). {title}. {publisher}. {url}"
+            citation = f"{formatted_editors} ({selected_paper['issued']['date-parts'][0][0]}). {title}. {publisher}. {url}."
         elif citation_format == 'MLA':
             # Format the citation in MLA style (placeholder)
-            citation = f"{editors[0]['family']} ,{editors[0]['given']}, et al. {title}. {publisher}, {selected_paper['issued']['date-parts'][0][0]}, {url} "
+            citation = f"{editors[0]['family']} ,{editors[0]['given']}, et al. {title}. {publisher}, {selected_paper['issued']['date-parts'][0][0]}, {url}."
         elif citation_format == 'Chicago':
             # Format the citation in Chicago style (placeholder)
-             citation = f"{formatted_editors}  {title}. {publisher}, {selected_paper['issued']['date-parts'][0][0]}. {url}"
+             citation = f"{formatted_editors}  {title}. {publisher}, {selected_paper['issued']['date-parts'][0][0]}. {url}."
         else:
             citation = "Citation format not supported."
     else:
+        url = selected_paper['resource']['primary']['URL'] if 'resource' in selected_paper else ''
         if citation_format == 'APA':
-            # Format the citation in APA style (placeholder)
-            citation = f"{', '.join([author['family'] for author in authors])} ({selected_paper['issued']['date-parts'][0][0]}). {title}. doi:{doi}"
+            # Format the citation in APA style
+            date_list= selected_paper['issued']['date-parts'][0]
+            date_obj = datetime(year=date_list[0], month=date_list[1], day=date_list[2])
+            today_date = datetime.now()
+
+            # Format the date
+            formatted_today_date = today_date.strftime("%B %d, %Y")
+
+            # Format the datetime object to the desired string format
+            formatted_date = date_obj.strftime("%Y, %B %d")
+            citation = f"{', '.join([author['family'] for author in authors])}. ({formatted_date}). {title}. {publisher}. Retrieved {formatted_today_date}, from {url}."
         elif citation_format == 'MLA':
-            # Format the citation in MLA style (placeholder)
-            citation = f"{', '.join([author['family'] for author in authors])}. \"{title}.\" doi:{doi}"
+            # Format the citation in MLA style
+            date_list= selected_paper['issued']['date-parts'][0]
+            date_obj = datetime(year=date_list[0], month=date_list[1], day=date_list[2])
+            formatted_date = date_obj.strftime("%d %b. %Y")
+
+            citation = f"{authors[0]['family']}, {authors[0]['given']}. {title}, {publisher}, {formatted_date}, {url[7:]}."
         elif citation_format == 'Chicago':
-            # Format the citation in Chicago style (placeholder)
-            citation = f"{', '.join([author['family'] for author in authors])}, {title}. doi:{doi}"
+            # Format the citation in Chicago style
+            date_list= selected_paper['issued']['date-parts'][0]
+            date_obj = datetime(year=date_list[0], month=date_list[1], day=date_list[2])
+            formatted_date = date_obj.strftime("%B %d, %Y")
+            citation = f"{authors[0]['family']}, {authors[0]['given']}. \"{title}.\" {publisher_location}: {publisher}, {formatted_date}. {url}."
         else:
             citation = "Citation format not supported."
     
