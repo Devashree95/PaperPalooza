@@ -3,9 +3,32 @@ import helpers.sidebar
 import requests
 import streamlit.components.v1 as components
 from datetime import datetime
+from PIL import Image
+import base64
 
 
 helpers.sidebar.show()
+
+logo = "./images/profile_3135715.png"
+image = Image.open(logo)
+
+# Function to convert image to Base64
+def get_image_as_base64(path):
+    with open(path, "rb") as image_file:
+        data = base64.b64encode(image_file.read()).decode()
+        return f"data:image/jpeg;base64,{data}"
+	
+image_base64 = get_image_as_base64(logo)
+
+st.markdown(f"""
+			<a href="/" style="color:white;text-decoration: none;">
+				<div style="display:table;margin-top:-15 rem;margin-left:0%; display: flex;">
+			  		<img src="{image_base64}" alt="PaperPalooza Logo" style="width:50px;height:40px;margin-left:750px; flex:2;" </img>
+					<span style="padding:10px; flex:2;">Username</span>
+				</div>
+			</a>
+			<br>
+				""", unsafe_allow_html=True)
 
 def search_papers(search_term, document_type):
     if document_type == 'Book':
@@ -27,7 +50,7 @@ def display_paper_info(selected_paper):
     if selected_paper:
         title = selected_paper['title'][0] if 'title' in selected_paper and selected_paper['title'] else 'Title not available'
         doi = selected_paper['DOI'] if 'DOI' in selected_paper else 'DOI not available'
-        authors = selected_paper['author'] if 'author' in selected_paper else 'Authors not available'
+        authors = selected_paper['author'] if 'author' in selected_paper else selected_paper['editor']
         publisher = selected_paper['publisher'] if 'publisher' in selected_paper else ''
         
         st.subheader(title)
@@ -51,12 +74,13 @@ def format_citation(selected_paper, citation_format, document_type):
     source = selected_paper['source'] if 'source' in selected_paper else ''
     publisher_location = selected_paper['publisher-location'] if 'publisher-location' in selected_paper else ''
 
-    if len(authors) == 1:
-        formatted_authors = f"{authors[0]['family']}, {authors[0]['given']}."
-    elif len(authors) == 2:
-        formatted_authors = f"{authors[0]['family']}, {authors[0]['given']} and {authors[1]['family']}, {authors[1]['given']}."
-    else:
-        formatted_authors = ', '.join([f"{author['family']}, {author['given']}." for author in authors[:-1]]) + f", and {authors[-1]['family']}, {authors[-1]['given']}."
+    if len(authors) > 0:
+        if len(authors) == 1:
+            formatted_authors = f"{authors[0]['family']}, {authors[0]['given']}."
+        elif len(authors) == 2:
+            formatted_authors = f"{authors[0]['family']}, {authors[0]['given']} and {authors[1]['family']}, {authors[1]['given']}."
+        else:
+            formatted_authors = ', '.join([f"{author['family']}, {author['given']}." for author in authors[:-1]]) + f", and {authors[-1]['family']}, {authors[-1]['given']}."
 
     
     if document_type == 'Journal Article':
