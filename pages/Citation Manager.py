@@ -50,13 +50,16 @@ def display_paper_info(selected_paper):
     if selected_paper:
         title = selected_paper['title'][0] if 'title' in selected_paper and selected_paper['title'] else 'Title not available'
         doi = selected_paper['DOI'] if 'DOI' in selected_paper else 'DOI not available'
-        authors = selected_paper['author'] if 'author' in selected_paper else selected_paper['editor']
+        authors = selected_paper['author'] if 'author' in selected_paper else (selected_paper['editor'] if 'editor' in selected_paper else 'Author info not available')
         publisher = selected_paper['publisher'] if 'publisher' in selected_paper else ''
         
         st.subheader(title)
         st.write(f'DOI: {doi}')
         st.write('Authors:')
-        st.write(', '.join([f"{author['given']} {author['family']}" for author in authors if 'given' in author and 'family' in author]))
+        if authors == 'Author info not available':
+            st.write(authors)
+        else:
+            st.write(', '.join([f"{author['given']} {author['family']}" for author in authors if 'given' in author and 'family' in author]))
 
 def format_citation(selected_paper, citation_format, document_type):
     if not selected_paper:  
@@ -74,8 +77,13 @@ def format_citation(selected_paper, citation_format, document_type):
     source = selected_paper['source'] if 'source' in selected_paper else ''
     publisher_location = selected_paper['publisher-location'] if 'publisher-location' in selected_paper else ''
 
+    if authors == '':
+            formatted_authors = " "
+
     if len(authors) > 0:
-        if len(authors) == 1:
+        if authors == '':
+            formatted_authors = " "
+        elif len(authors) == 1:
             formatted_authors = f"{authors[0]['family']}, {authors[0]['given']}."
         elif len(authors) == 2:
             formatted_authors = f"{authors[0]['family']}, {authors[0]['given']} and {authors[1]['family']}, {authors[1]['given']}."
@@ -86,20 +94,24 @@ def format_citation(selected_paper, citation_format, document_type):
     if document_type == 'Journal Article':
         if citation_format == 'APA':
             # Format the citation in APA style 
-            if len(authors) == 1:
+            if authors == '':
+                formatted_authors = " "
+            elif len(authors) == 1:
                 formatted_authors = f"{authors[0]['family']}, {authors[0]['given'][0]}."
             elif len(authors) == 2:
                 formatted_authors = f"{authors[0]['family']}, {authors[0]['given'][0]} & {authors[1]['family']}, {authors[1]['given'][0]}."
             else:
                 formatted_authors = ', '.join([f"{author['family']}, {author['given'][0]}." for author in authors[:-1]]) + f", & {authors[-1]['family']}, {authors[-1]['given'][0]}."
 
-
-            citation = f"{formatted_authors} ({selected_paper['issued']['date-parts'][0][0]}). {title}. {container_title[0]}, {volume}, {page}. https://doi.org/{doi}."
+            if authors == "":
+                citation = f"{title}. ({selected_paper['issued']['date-parts'][0][0]}). {container_title[0]}, {volume}, {page}. https://doi.org/{doi}."
+            else:
+                citation = f"{formatted_authors} ({selected_paper['issued']['date-parts'][0][0]}). {title}. {container_title[0]}, {volume}, {page}. https://doi.org/{doi}."
         elif citation_format == 'MLA':
             # Format the citation in MLA style (placeholder)
-            citation = f"{formatted_authors}. \"{title}.\" {container_title[0]}, vol.{volume}, {publisher}, {selected_paper['issued']['date-parts'][0][0]}, pp. {page}. {source}, https://doi.org/{doi}."
+            citation = f"{formatted_authors} \"{title}.\" {container_title[0]}, vol.{volume}, {publisher}, {selected_paper['issued']['date-parts'][0][0]}, pp. {page}. {source}, https://doi.org/{doi}."
         elif citation_format == 'Chicago':
-            citation = f"{formatted_authors}. \"{title}.\" {container_title[0]} {volume} ({selected_paper['issued']['date-parts'][0][0]}): {page}. https://doi.org/{doi}."
+            citation = f"{formatted_authors} \"{title}.\" {container_title[0]} {volume} ({selected_paper['issued']['date-parts'][0][0]}): {page}. https://doi.org/{doi}."
         else:
             citation = "Citation format not supported."
     elif document_type == 'Book':
