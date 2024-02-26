@@ -6,9 +6,8 @@ import base64
 
 
 st.set_page_config(
-	page_title="PaperPalooza",
-	page_icon="📄",
-	layout="wide"
+	page_title="Paperpalooza",
+	page_icon="📄"
 )
 
 logo = "./images/profile_3135715.png"
