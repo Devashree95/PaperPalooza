@@ -7,3 +7,4 @@ services
 streamlit
 streamlit_option_menu
 python-dotenv
+transformers
