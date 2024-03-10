@@ -63,17 +63,20 @@ st.header("Welcome to Paperpalooza!")
 
 video1_url = 'https://www.youtube.com/watch?v=5WyKVUtw90g'
 video2_url = 'https://www.youtube.com/watch?v=ehn0aSEUJVM'
+video3_url = 'https://www.youtube.com/watch?v=tAyQ9sUfPIo'
+video4_url = 'https://www.youtube.com/watch?v=fCUqJeLl2to'
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.video(video1_url)
+    st.video(video3_url)
     
 with col2:
     st.video(video2_url)
+    st.video(video4_url)
     
-video3_url = 'https://www.youtube.com/watch?v=tAyQ9sUfPIo'
-st.video(video3_url)
+
     
 
 
