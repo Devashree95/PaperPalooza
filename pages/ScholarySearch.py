@@ -21,6 +21,27 @@ def get_image_as_base64(path):
 	
 image_base64 = get_image_as_base64(logo)
 
+def get_base64_of_file(path):
+    with open(path, "rb") as file:
+        return base64.b64encode(file.read()).decode()
+    
+def set_background_from_local_file(path):
+    base64_string = get_base64_of_file(path)
+    # CSS to utilize the Base64 encoded string as a background
+    css = f"""
+    <style>
+    .stApp {{
+        background-image: url("data:image/png;base64,{base64_string}");
+        background-size: cover;
+        background-position: center;
+    }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+    
+set_background_from_local_file('./images/background_2.png')
+
+
 st.markdown(f"""
 			<a href="/" style="color:white;text-decoration: none;">
 				<div style="display:table;margin-top:-15 rem;margin-left:0%; display: flex;">

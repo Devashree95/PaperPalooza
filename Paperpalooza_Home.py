@@ -13,13 +13,34 @@ st.set_page_config(
 logo = "./images/profile_3135715.png"
 image = Image.open(logo)
 
+
 # Function to convert image to Base64
 def get_image_as_base64(path):
     with open(path, "rb") as image_file:
         data = base64.b64encode(image_file.read()).decode()
         return f"data:image/jpeg;base64,{data}"
+    
+def get_base64_of_file(path):
+    with open(path, "rb") as file:
+        return base64.b64encode(file.read()).decode()
 	
 image_base64 = get_image_as_base64(logo)
+
+def set_background_from_local_file(path):
+    base64_string = get_base64_of_file(path)
+    # CSS to utilize the Base64 encoded string as a background
+    css = f"""
+    <style>
+    .stApp {{
+        background-image: url("data:image/png;base64,{base64_string}");
+        background-size: cover;
+        background-position: center;
+    }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+    
+set_background_from_local_file('./images/background.png')
 
 st.markdown(f"""
 			<a href="/" style="color:white;text-decoration: none;">
@@ -38,4 +59,22 @@ st.markdown(f"""
 
 helpers.sidebar.show()
 
-st.markdown("Welcome to Paperpalooza!")
+st.header("Welcome to Paperpalooza!")
+
+video1_url = 'https://www.youtube.com/watch?v=5WyKVUtw90g'
+video2_url = 'https://www.youtube.com/watch?v=ehn0aSEUJVM'
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.video(video1_url)
+    
+with col2:
+    st.video(video2_url)
+    
+video3_url = 'https://www.youtube.com/watch?v=tAyQ9sUfPIo'
+st.video(video3_url)
+    
+
+
+
