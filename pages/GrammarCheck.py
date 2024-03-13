@@ -18,7 +18,7 @@ def extract_text_from_pdf(file):
 # Updated function to check grammar using GPT-4 API and the chat endpoint
 def check_grammar(text):
     api_url = "https://api.openai.com/v1/chat/completions"
-    api_key = "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"  # Replace with your actual API key
+    api_key = "insert_api_key_here"  # Replace with your actual API key
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
