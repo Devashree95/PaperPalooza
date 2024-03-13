@@ -61,6 +61,8 @@ helpers.sidebar.show()
 
 st.header("Welcome to Paperpalooza!")
 
+st.subheader("Latest Research at Virginia Tech:")
+
 video1_url = 'https://www.youtube.com/watch?v=5WyKVUtw90g'
 video2_url = 'https://www.youtube.com/watch?v=ehn0aSEUJVM'
 video3_url = 'https://www.youtube.com/watch?v=tAyQ9sUfPIo'
@@ -75,6 +77,15 @@ with col1:
 with col2:
     st.video(video2_url)
     st.video(video4_url)
+    
+st.subheader("Resources:")
+st.markdown("[Virginia Tech Research Resources](https://www.research.vt.edu/research-development/resources.html)")
+
+st.markdown("[Research Support](https://lib.vt.edu/research-teaching/research-services.html)")
+
+st.markdown("[Virginia Tech Research](https://www.research.vt.edu/)")
+
+
     
 
     

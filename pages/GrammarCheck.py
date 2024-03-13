@@ -2,6 +2,31 @@ import streamlit as st
 import fitz  # PyMuPDF for PDF processing
 import requests
 import time
+import base64
+import helpers.sidebar
+
+helpers.sidebar.show()
+
+def get_base64_of_file(path):
+    with open(path, "rb") as file:
+        return base64.b64encode(file.read()).decode()
+    
+def set_background_from_local_file(path):
+    base64_string = get_base64_of_file(path)
+    # CSS to utilize the Base64 encoded string as a background
+    css = f"""
+    <style>
+    .stApp {{
+        background-image: url("data:image/png;base64,{base64_string}");
+        background-size: cover;
+        background-position: center;
+    }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+    
+set_background_from_local_file('./images/grammar_background.png')
+
 
 # Initialize session state for tracking dismissed suggestions
 if 'dismissed_suggestions' not in st.session_state:
