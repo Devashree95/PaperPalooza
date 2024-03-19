@@ -1,6 +1,8 @@
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 WORKDIR /app
+
+ENV GITLAB_ACCESS_TOKEN default_placeholder
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -9,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://kanadn:glpat-N6k13ZWsss9ySa4bM4xZ@version.cs.vt.edu/kanadn/paperpalooza.git
+RUN git clone https://kanadn:{GITLAB_ACCESS_TOKEN}@version.cs.vt.edu/kanadn/paperpalooza.git
 
 WORKDIR /app/paperpalooza
 

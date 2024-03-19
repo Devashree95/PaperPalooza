@@ -131,14 +131,17 @@ if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
     
 
-if not st.session_state["authenticated"]:
-    with main_content.container():
-        # Function to show the login page
-        show_login_page()  # This function will include login form and authentication logic
-else:
-    # Clear the main content placeholder now that the user is authenticated
-    main_content.empty()
-    show_homepage()
+main_content.empty()
+show_homepage()
+
+# if not st.session_state["authenticated"]:
+#     with main_content.container():
+#         # Function to show the login page
+#         show_login_page()  # This function will include login form and authentication logic
+# else:
+#     # Clear the main content placeholder now that the user is authenticated
+#     main_content.empty()
+#     show_homepage()
 
 
 

@@ -4,17 +4,17 @@ from typing import List, Dict
 import pandas
 from streamlit.delta_generator import DeltaGenerator
 
-import services.llm
+import helpers.chatbot.llm as llm
 
 
 async def run_conversation(messages: List[Dict[str, str]], message_placeholder: DeltaGenerator) \
         -> List[Dict[str, str]]:
     full_response = ""
     message_placeholder.markdown("Thinking...")
-    chunks = services.llm.converse(messages)
+    chunks = llm.converse(messages)
     chunk = await anext(chunks, "END OF CHAT")
     while chunk != "END OF CHAT":
-        print(f"Received chunk from LLM service: {chunk}")
+        # print(f"Received chunk from LLM service: {chunk}")
         if chunk.startswith("EXCEPTION"):
             full_response = ":red[We are having trouble generating advice.  Please wait a minute and try again.]"
             break
@@ -29,7 +29,7 @@ async def run_conversation(messages: List[Dict[str, str]], message_placeholder: 
 async def run_prompt(prompt: str,
                      message_placeholder: DeltaGenerator) \
         -> List[Dict[str, str]]:
-    messages = services.llm.create_conversation_starter(prompt)
+    messages = llm.create_conversation_starter(prompt)
     messages = await run_conversation(messages, message_placeholder)
     return messages
 

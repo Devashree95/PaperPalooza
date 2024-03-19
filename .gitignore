@@ -1,2 +1,4 @@
 helpers/__pycache__
+helpers/chatbot/__pycache__
 virtualEnv/
+.venv
