@@ -13,6 +13,7 @@ st.set_page_config(
 logo = "./images/profile_3135715.png"
 image = Image.open(logo)
 
+
 # Function to convert image to Base64
 def get_image_as_base64(path):
     with open(path, "rb") as image_file:

@@ -7,3 +7,5 @@ services
 streamlit
 streamlit_option_menu
 python-dotenv
+psycopg2
+bcrypt
