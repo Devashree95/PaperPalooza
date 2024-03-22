@@ -1,5 +1,8 @@
 # Paperpalooza
 
+Chech out our live demo [here](https://paperpalooza.discovery.cs.vt.edu/)
+
+
 # Chatbot:
 ![Feature Demo](/images/chatbot.gif)
 
