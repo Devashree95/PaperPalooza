@@ -10,6 +10,13 @@ import base64
 
 helpers.sidebar.show()
 
+if 'auth' not in st.session_state:
+    st.switch_page("pages/login.py")
+if not st.session_state['auth']:
+    st.switch_page("pages/login.py")
+else:
+    st.write("logged in")
+
 logo = "./images/profile_3135715.png"
 image = Image.open(logo)
 

@@ -30,6 +30,10 @@ def login(username, password, conn):
     result = bcrypt.checkpw(bytes, hash)
     if result:
         st.success("LOGGED IN!")
+        if 'auth' not in st.session_state:
+            st.session_state['auth'] = True
+            # st.session_state['user'] = username
+            st.switch_page("pages/ScholarySearch.py")
     else:
         st.error("NOPE!")
     
