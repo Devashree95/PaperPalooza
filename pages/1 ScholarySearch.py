@@ -8,7 +8,7 @@ import streamlit.components.v1 as components
 from PIL import Image
 import base64
 
-helpers.sidebar.show()
+#helpers.sidebar.show()
 
 logo = "./images/profile_3135715.png"
 image = Image.open(logo)
@@ -39,7 +39,7 @@ def set_background_from_local_file(path):
     """
     st.markdown(css, unsafe_allow_html=True)
     
-set_background_from_local_file('./images/background_2.png')
+set_background_from_local_file('./images/chatbot_bg.png')
 
 
 st.markdown(f"""

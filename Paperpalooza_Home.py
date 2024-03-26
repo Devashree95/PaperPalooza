@@ -4,19 +4,13 @@ from streamlit_option_menu import option_menu
 from PIL import Image
 import base64
 
+from helpers.login import login_snippet
 
 st.set_page_config(
 	page_title="Paperpalooza",
 	page_icon="📄"
 )
 
-st.markdown("""
-    <style>
-        section[data-testid="stSidebar"][aria-expanded="true"]{
-            display: none;
-        }
-    </style>
-    """, unsafe_allow_html=True)
 
 col3, col1, col2 = st.columns([1,2, 1])
 
@@ -31,6 +25,14 @@ def get_image_as_base64(path):
     with open(path, "rb") as image_file:
         data = base64.b64encode(image_file.read()).decode()
         return f"data:image/jpeg;base64,{data}"
+    
+st.markdown("""
+    <style>
+        section[data-testid="stSidebar"][aria-expanded="true"]{
+            display: none;
+        }
+    </style>
+    """, unsafe_allow_html=True)
     
 def get_base64_of_file(path):
     with open(path, "rb") as file:
@@ -54,41 +56,11 @@ def set_background_from_local_file(path):
     
 set_background_from_local_file('./images/loginbkg.png')
 
-main_content = st.empty()
-
-users = {
-    "user1": "password1",
-    "user2": "password2"
-}
-
-def authenticate_user(username, password):
-    if username in users and users[username] == password:
-        return True
-    return False
-
-def show_login_page():
-    with col2:
-          image_base64 = get_image_as_base64(logo1)
-          st.markdown(f"""
-				<a href="/" style="color:white;text-decoration: none;">
-					<div style="display:table;margin-top:-15 rem;margin-left:0%; display: flex;">
-						<img src="{image_base64}" alt="Insurehub Logo" style="width:100px;height:100px;" </img>
-					</div>
-				</a>
-				<br>
-					""", unsafe_allow_html=True)
+if "user_logged_in" not in st.session_state or not st.session_state.user_logged_in:
+    st.toast("You need to login to access this page.")
     with col1:
-          st.title("Welcome to Paperpalooza!")
-          st.subheader("Login")
-          username = st.text_input("Username")
-          password = st.text_input("Password", type="password")
-          if st.button("Login"):
-            if authenticate_user(username, password):
-                st.session_state["authenticated"] = True
-				#st.success("You're logged in!")
-                st.experimental_rerun()
-            else:
-                st.error("Invalid username or password")
+        user_logged_in = login_snippet(key="home_login")
+
 
 def show_homepage():
     st.markdown("""
@@ -107,7 +79,7 @@ def show_homepage():
 				</a>
 				<br>
 					""", unsafe_allow_html=True)
-    helpers.sidebar.show()
+    #helpers.sidebar.show()
     st.header("Welcome to Paperpalooza!")
     st.subheader("Latest Research at Virginia Tech:")
     video1_url = 'https://www.youtube.com/watch?v=5WyKVUtw90g'
@@ -127,21 +99,11 @@ def show_homepage():
     st.markdown("[Research Support](https://lib.vt.edu/research-teaching/research-services.html)")
     st.markdown("[Virginia Tech Research](https://www.research.vt.edu/)")
     
-if "authenticated" not in st.session_state:
-    st.session_state["authenticated"] = False
     
 
-main_content.empty()
-show_homepage()
+if st.session_state.user_logged_in:
+    show_homepage()
 
-# if not st.session_state["authenticated"]:
-#     with main_content.container():
-#         # Function to show the login page
-#         show_login_page()  # This function will include login form and authentication logic
-# else:
-#     # Clear the main content placeholder now that the user is authenticated
-#     main_content.empty()
-#     show_homepage()
 
 
 

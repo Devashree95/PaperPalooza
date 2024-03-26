@@ -6,9 +6,9 @@ import base64
 import helpers.sidebar
 import os
 
-load_dotenv()
+#load_dotenv()
 
-helpers.sidebar.show()
+#helpers.sidebar.show()
 
 def get_base64_of_file(path):
     with open(path, "rb") as file:

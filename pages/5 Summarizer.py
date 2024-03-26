@@ -12,7 +12,7 @@ st.set_page_config(
 	layout="wide"
 )
 
-helpers.sidebar.show()
+#helpers.sidebar.show()
 
 def get_base64_of_file(path):
     with open(path, "rb") as file:

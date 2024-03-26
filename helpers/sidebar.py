@@ -27,8 +27,8 @@ def show() -> None:
 				""", unsafe_allow_html=True)
 		
 
-		reload_button = st.button("↪︎  Reload Page")
-		if reload_button:
-			st.session_state.clear()
-			st.experimental_rerun()
+		# reload_button = st.button("↪︎  Reload Page")
+		# if reload_button:
+		# 	st.session_state.clear()
+		# 	st.experimental_rerun()
 

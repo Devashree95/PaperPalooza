@@ -7,7 +7,7 @@ from PIL import Image
 import base64
 
 
-helpers.sidebar.show()
+#helpers.sidebar.show()
 
 logo = "./images/profile_3135715.png"
 image = Image.open(logo)
