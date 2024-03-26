@@ -38,6 +38,7 @@ def login_snippet(key="login"):
 
 
             if submit:
+                st.session_state['username'] = email
                 # If submit, check if the email exists in the database
                 cur.execute("SELECT EXISTS (SELECT 1 FROM users_test WHERE username = %s)", (email,))
                 email_exists = cur.fetchone()

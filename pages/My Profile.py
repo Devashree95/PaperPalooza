@@ -52,7 +52,8 @@ st.markdown(f"""
                 <br>
                     """, unsafe_allow_html=True)
 
-userId = '9D09C346-2379-4128-2C90-1590BBC16244'
+cur.execute(f"select user_id from user_details where email = '{st.session_state['username']}'")
+userId= cur.fetchall()[0][0]
 
 def getProfileDetails(attr):
     cur.execute(f"select {attr} from user_details where user_id = '{userId}'")
