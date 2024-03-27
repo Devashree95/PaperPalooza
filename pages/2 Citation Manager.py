@@ -5,12 +5,17 @@ import streamlit.components.v1 as components
 from datetime import datetime
 from PIL import Image
 import base64
+from helpers import connection as conn
+from psycopg2 import IntegrityError
 
 
 #helpers.sidebar.show()
 
 logo = "./images/profile_3135715.png"
 image = Image.open(logo)
+
+connection = conn.pgsql_connect()
+cur = connection.cursor()
 
 # Function to convert image to Base64
 def get_image_as_base64(path):
@@ -37,6 +42,38 @@ def set_background_from_local_file(path):
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
+
+def get_user_id(email):
+    select_query = f"select user_id from user_details where email= '{email}'"
+    cur.execute(select_query)
+    return cur.fetchall()[0][0]
+
+def save_citation_to_db(user_id,title,date_saved_on, doc_type, format, citation):
+    try:
+        # Assuming your table is named 'citations' and has at least two columns: 'document_id' and 'citation_text'
+        insert_query = f"INSERT INTO citations (user_id, title, date_saved_on, doc_type, format, citation) VALUES ('{user_id}', '{title}', '{date_saved_on}', '{doc_type}', '{format}', '{citation}' )"
+        
+        cur.execute(insert_query)
+        connection.commit()
+        st.success("Citation saved successfully!")
+    except IntegrityError as e:
+        # Rollback the transaction so you can execute another command
+        connection.rollback()
+        # Check if the error message is about a duplicate key
+        if "duplicate key value violates unique constraint" in str(e):
+            st.warning("This citation already exists.")
+        else:
+            st.error(f"Failed to save citation: {e}")
+    except Exception as e:
+        st.error(f"Failed to save citation: {e}")
+        connection.rollback()
+
+def get_citations(userid):
+    print(userid)
+    select_query = f"select title, citation from citations where user_id= '{userid}'"
+    cur.execute(select_query)
+    citations = cur.fetchall()
+    return citations
     
 set_background_from_local_file('./images/dark_background.png')
 
@@ -279,5 +316,25 @@ if search_term:
         st.subheader('Formatted Citation:')
         #st.write(formatted_citation)
         display_formatted_citation(formatted_citation)
+
+        if st.button('Save Citation'):
+            # Here, we use DOI as a unique identifier for the document. Adjust as needed.
+            user_id = get_user_id(st.session_state['username'])
+            title = st.session_state[session_key]['selected_paper'].get('title', 'N/A')[0]
+            citation = formatted_citation
+            date_saved_on = today = datetime.today().date()
+            doc_type = document_type
+            format = citation_format
+            save_citation_to_db(user_id, title, date_saved_on, doc_type, format, citation)
 else:
     st.info('Enter a search term to begin.')
+
+st.subheader("Citation History:")
+user_id = get_user_id(st.session_state['username'])
+citations = get_citations(user_id)
+if citations:
+    for title, citation_text in citations:
+        # Display each citation
+        st.markdown(f"**{title}**")
+        st.write(citation_text)
+        st.markdown("---")

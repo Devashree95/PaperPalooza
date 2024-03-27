@@ -81,6 +81,12 @@ def login_snippet(key="login"):
                 new_password = st.text_input("Password", type="password", key="new_password")  # Use unique key
                 name = st.text_input("Name", key="name")
                 submit_account = st.form_submit_button("Create Account")
+                
+            if st.button("Cancel"):  # Use st.button instead of st.form_submit_button
+                # Reset the relevant session states to display the login form again
+                st.session_state.show_login = True
+                st.session_state.button_clicked = False
+                st.experimental_rerun()
 
             if submit_account:
                 bytes = new_password.encode('utf-8')
