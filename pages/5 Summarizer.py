@@ -4,15 +4,25 @@ import os
 import helpers.sidebar
 from PIL import Image
 import base64
-from transformers import pipeline
+from dotenv import load_dotenv
+import time
+load_dotenv()
+import fitz
+import openai
+from nltk.tokenize import sent_tokenize
+from io import StringIO
+
 
 st.set_page_config(
-	page_title="ETD Summarizer",
+	page_title="Text Summarizer",
 	page_icon="📄",
 	layout="wide"
 )
 
-#helpers.sidebar.show()
+helpers.sidebar.show()
+
+# Streamlit UI setup
+st.title("Text Summarizer")
 
 def get_base64_of_file(path):
     with open(path, "rb") as file:
@@ -57,65 +67,128 @@ st.markdown(f"""
 				""", unsafe_allow_html=True)
 
 
-#api_token = ""
-#API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
-#headers = {"Authorization": f"Bearer{api_token}"}
-
-#def query(payload):
-#    response = requests.post(API_URL, headers=headers, json=payload)
-#    return response.json()
-
-@st.cache_resource(show_spinner=False)
-def load_summarizer():
-    model = pipeline("summarization",  model="facebook/bart-large-cnn", framework="pt")
-    return model
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
-def generate_chunks(inp_str):
-    max_chunk = 500
-    inp_str = inp_str.replace('.', '.<eos>')
-    inp_str = inp_str.replace('?', '?<eos>')
-    inp_str = inp_str.replace('!', '!<eos>')
+def read_pdf(file):
+    context = ""
+    with fitz.open(stream=file.read(), filetype="pdf") as pdf_file:
+        num_pages = pdf_file.page_count
+        for page_num in range(num_pages):
+                page = pdf_file[page_num]
+                page_text = page.get_text()
+                context += page_text
+    return context
+
+def split_text(text, chunk_size=5000):
+  chunks = []
+  current_chunk = StringIO()
+  current_size = 0
+  sentences = sent_tokenize(text)
+  for sentence in sentences:
+    sentence_size = len(sentence)
+    if sentence_size > chunk_size:
+      while sentence_size > chunk_size:
+        chunk = sentence[:chunk_size]
+        chunks.append(chunk)
+        sentence = sentence[chunk_size:]
+        sentence_size -= chunk_size
+        current_chunk = StringIO()
+        current_size = 0
+    if current_size + sentence_size < chunk_size:
+      current_chunk.write(sentence)
+      current_size += sentence_size
+    else:
+      chunks.append(current_chunk.getvalue())
+      current_chunk = StringIO()
+      current_size = 0
+      current_chunk.write(sentence)
+      current_size = sentence_size
+  if current_chunk.getvalue():
+     chunks.append(current_chunk.getvalue())
+  return chunks
+  
+
+def gpt3_completion(prompt, model='gpt-3.5-turbo', temp=0.5, top_p=0.3, tokens=1000):
+    #st.write("Calling GPT-3 API...")
+    prompt = prompt.encode(encoding='ASCII',errors='ignore').decode()
+    try:
+        response = openai.chat.completions.create(
+       messages=[
+        {
+            "role": "system",
+            "content": prompt,
+        }
+            ],
+        model=model,
+        temperature=temp,
+        top_p=top_p,
+        max_tokens=tokens,
+        stop=None
+        )
+        #st.write("API Response:", response)
+        summary_text = response.choices[0].message.content.strip()
+        #st.write("Summary:", summary_text)
+        return summary_text
+    except Exception as oops:
+        st.error(f"GPT-3 error: {oops}")
+        return f"GPT-3 error: {oops}"
+
+
+def summarize(doc):
+  with st.spinner(text="Summarizing..."):
+    chunks = split_text(doc)
+    #st.write("Chunks:",chunks)
+    summaries = []
+    for chunk in chunks:
+        prompt = "Please summarize the following document in 2 sentences: \n"
+        summary = gpt3_completion(prompt + chunk)
+        if summary.startswith("GPT-3 error:"):
+            continue
+        summaries.append(summary)
+    return ' '.join(summaries)
+
+document = st.file_uploader("Choose a PDF file", type=["pdf"])
+#st.write(document)
+
+if st.button("Summarize File"):
+    if not document:
+        st.warning("Please upload pdf")
+    else:
+        docs = read_pdf(document)
+        summary_text = summarize(docs)
+        st.write("Summary:  \n", summary_text)
+
+def text_input(text):
+    api_url = "https://api.openai.com/v1/chat/completions"
+    api_key = openai.api_key 
+    headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+    data = {
+            "model": "gpt-4",
+            "messages": [
+                {"role": "system", "content": "Please summarize the following text input in atleast 150 words:\n"},
+                {"role": "user", "content": text},
+            ],
+        }
     
-    sentences = inp_str.split('<eos>')
-    current_chunk = 0 
-    chunks = []
-    for sentence in sentences:
-        if len(chunks) == current_chunk + 1: 
-            if len(chunks[current_chunk]) + len(sentence.split(' ')) <= max_chunk:
-                chunks[current_chunk].extend(sentence.split(' '))
-            else:
-                current_chunk += 1
-                chunks.append(sentence.split(' '))
+    response = requests.post(api_url, headers=headers, json=data)
+    if response.status_code == 200:
+        result = response.json()
+        suggestions = result.get("choices", [])[0].get("message", {}).get("content", "").strip()
+        return suggestions
+    else:
+        print(response.text)  # For debugging purposes
+        return ["There was an error summarizing the text."]
+  
+text = st.text_area("Enter text to summarize:", height=250)
+if st.button("Summarize Text"):
+        if not text:
+            st.warning("Please input text")
         else:
-            chunks.append(sentence.split(' '))
-
-    for chunk_id in range(len(chunks)):
-        chunks[chunk_id] = ' '.join(chunks[chunk_id])
-    return chunks
-
-
-summarizer = load_summarizer()
-st.title("Text Summarizer")
-st.write(" ")
-
-st.markdown("Welcome to Text Summarizer!")
-st.write(" ")
-sentence = st.text_area('Please paste your text below :', height=250)
-button = st.button("Summarize")
-st.write(" ")
-st.write(" ")
-st.write("Summary:")
-
-max = st.sidebar.slider('Select max', 50, 500, step=10, value=200)
-min = st.sidebar.slider('Select min', 10, 450, step=10, value=100)
-
-with st.spinner("Generating Summary..."):
-    if button and sentence:
-        chunks = generate_chunks(sentence)
-        res = summarizer(chunks,
-                         max_length=max, 
-                         min_length=min)
-        text = ' '.join([summ['summary_text'] for summ in res])
-        # st.write(result[0]['summary_text'])
-        st.write(text)
+            with st.spinner(text="Summarizing..."):
+                suggestions = text_input(text)
+                st.write("Summary:  \n", suggestions)
+     
