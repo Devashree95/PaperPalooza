@@ -82,7 +82,7 @@ def login_snippet(key="login"):
                 name = st.text_input("Name", key="name")
                 submit_account = st.form_submit_button("Create Account")
                 
-            if st.button("Cancel"):  # Use st.button instead of st.form_submit_button
+            if st.button("Cancel"):
                 # Reset the relevant session states to display the login form again
                 st.session_state.show_login = True
                 st.session_state.button_clicked = False
@@ -98,8 +98,10 @@ def login_snippet(key="login"):
                     cur.execute("INSERT INTO users (username, password, name) VALUES (%s, %s, %s)", (new_email, hash, name))
                     connection.commit()
                     st.toast("Account created successfully")
+                    st.session_state['username'] = new_email
                     placeholder.empty()
                     st.session_state.user_logged_in = True
+                    st.experimental_rerun()
                     return True
                     # st.session_state.show_login = True
                     # placeholder.empty()
