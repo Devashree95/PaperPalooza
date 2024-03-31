@@ -353,3 +353,5 @@ if citations:
                 delete_citation(title)
                 st.experimental_rerun()
         st.markdown("---")
+else:
+    st.write('No Citation History available.')

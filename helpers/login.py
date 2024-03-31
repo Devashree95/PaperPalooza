@@ -40,14 +40,14 @@ def login_snippet(key="login"):
             if submit:
                 st.session_state['username'] = email
                 # If submit, check if the email exists in the database
-                cur.execute("SELECT EXISTS (SELECT 1 FROM users_test WHERE username = %s)", (email,))
+                cur.execute("SELECT EXISTS (SELECT 1 FROM users WHERE username = %s)", (email,))
                 email_exists = cur.fetchone()
                 if not email_exists[0]:
                     st.toast("Invalid username")
                     st.stop()
 
                 # If submit, fetch password from the database
-                cur.execute("SELECT password FROM users_test WHERE username = %s", (email,))
+                cur.execute("SELECT password FROM users WHERE username = %s", (email,))
                 password = cur.fetchone()[0]
                 
                 bytes = input_password.encode('utf-8')
@@ -95,7 +95,7 @@ def login_snippet(key="login"):
                 hash = hash.decode('utf-8')
 
                 try:
-                    cur.execute("INSERT INTO users_test (username, password, name) VALUES (%s, %s, %s)", (new_email, hash, name))
+                    cur.execute("INSERT INTO users (username, password, name) VALUES (%s, %s, %s)", (new_email, hash, name))
                     connection.commit()
                     st.toast("Account created successfully")
                     placeholder.empty()
