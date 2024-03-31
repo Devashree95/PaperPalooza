@@ -74,6 +74,16 @@ def get_citations(userid):
     cur.execute(select_query)
     citations = cur.fetchall()
     return citations
+
+def delete_citation(title):
+    try:
+        delete_query = f"DELETE FROM citations WHERE title = '{title}'"
+        cur.execute(delete_query)
+        connection.commit()
+        st.success("Citation deleted successfully!")
+    except Exception as e:
+        st.error(f"Failed to delete citation: {e}")
+        connection.rollback()
     
 set_background_from_local_file('./images/dark_background.png')
 
@@ -293,8 +303,7 @@ if search_term:
         selected_title = st.selectbox(
             'Select a paper:',
             paper_titles,
-            index=paper_titles.index(st.session_state[session_key]['selected_title']),
-            key=f'dropdown_{session_key}',
+            key=f'dropdown',
         )
         
         citation_format = st.selectbox(
@@ -334,7 +343,13 @@ user_id = get_user_id(st.session_state['username'])
 citations = get_citations(user_id)
 if citations:
     for title, citation_text in citations:
+        col1, col2 = st.columns([8, 2])
         # Display each citation
-        st.markdown(f"**{title}**")
-        st.write(citation_text)
+        with col1:
+            st.markdown(f"**{title}**")
+            st.write(citation_text)
+        with col2:
+            if st.button("Delete", key=f"delete_{title}"):
+                delete_citation(title)
+                st.experimental_rerun()
         st.markdown("---")
