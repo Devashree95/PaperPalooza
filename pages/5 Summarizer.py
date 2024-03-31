@@ -19,10 +19,9 @@ st.set_page_config(
 	layout="wide"
 )
 
-helpers.sidebar.show()
+#helpers.sidebar.show()
 
 # Streamlit UI setup
-st.title("Text Summarizer")
 
 def get_base64_of_file(path):
     with open(path, "rb") as file:
@@ -69,6 +68,7 @@ st.markdown(f"""
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
+st.title("Text Summarizer") 
 
 def read_pdf(file):
     context = ""
