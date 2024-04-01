@@ -10,3 +10,6 @@ python-dotenv
 openai
 PyMuPDF
 nltk
+PyMuPDF
+psycopg2
+bcrypt

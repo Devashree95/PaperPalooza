@@ -15,8 +15,7 @@ from io import StringIO
 
 st.set_page_config(
 	page_title="Text Summarizer",
-	page_icon="📄",
-	layout="wide"
+	page_icon="📄"
 )
 
 #helpers.sidebar.show()
