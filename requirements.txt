@@ -10,6 +10,5 @@ python-dotenv
 openai
 PyMuPDF
 nltk
-PyMuPDF
-psycopg2
+psycopg2-binary
 bcrypt
