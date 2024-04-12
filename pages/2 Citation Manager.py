@@ -73,7 +73,9 @@ def post_comment(comment_text):
     """
     com_id = uuid.uuid4()
     date_saved_on = today = datetime.today().date()
-    insert_query = f"INSERT INTO comments VALUES ('{com_id}', '{st.session_state.username}', '{comment_text}', '{date_saved_on}' )"
+    app = 'citation'
+
+    insert_query = f"INSERT INTO comments VALUES ('{com_id}', '{st.session_state.username}', '{comment_text}', '{date_saved_on}', '{app}' )"
         
     cur.execute(insert_query)
     connection.commit()
