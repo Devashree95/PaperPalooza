@@ -46,7 +46,7 @@ st.markdown(f"""
                 <a href="/" style="color:white;text-decoration: none;">
                     <div style="display:table;margin-top:-15 rem;margin-left:0%; display: flex;">
                         <img src="{image_base64}" alt="Insurehub Logo" style="width:50px;height:40px;margin-left:750px; flex:2;" </img>
-                        <span style="padding:10px; flex:2;">Username</span>
+                        <span style="padding:10px; flex:2;">{st.session_state.username}</span>
                     </div>
                 </a>
                 <br>
