@@ -64,6 +64,16 @@ def get_email_list():
         select_query = f"select advisor_email, student_email from advisor_student where student_email= '{st.session_state.username}'"
         cur.execute(select_query)
         return cur.fetchall()[0]
+    
+def get_user_ids():
+    if user_type == 'advisor':
+        select_query = f"select user_id from user_details us join advisor_student ad on us.email = ad.advisor_email or us.email = ad.student_email where advisor_email= '{st.session_state.username}'"
+        cur.execute(select_query)
+        return cur.fetchall()[0]
+    else:
+        select_query = f"select user_id from user_details us join advisor_student ad on us.email = ad.advisor_email or us.email = ad.student_email where student_email= '{st.session_state.username}'"
+        cur.execute(select_query)
+        return cur.fetchall()[0]
 
 def post_comment(comment_text):
     """
@@ -153,8 +163,14 @@ def save_citation_to_db(user_id,title,date_saved_on, doc_type, format, citation)
         connection.rollback()
 
 def get_citations(userid, start_date, end_date):
-    select_query = f"select title, citation from citations where user_id= '{userid}' and date_saved_on >= '{start_date}' and date_saved_on <= '{end_date}'"
-    cur.execute(select_query)
+    userids = get_user_ids()
+    # Convert tuple to a list for easier manipulation if needed
+    user_list = list(userids)
+
+    # Dynamic SQL query creation based on the number of emails
+    placeholders = ', '.join(['%s'] * len(user_list))
+    select_query = f"select title, citation from citations where user_id in ({placeholders}) and date_saved_on >= '{start_date}' and date_saved_on <= '{end_date}'"
+    cur.execute(select_query, user_list)
     citations = cur.fetchall()
     return citations
 

@@ -2,7 +2,6 @@ import streamlit as st
 from dotenv import load_dotenv
 import helpers.sidebar
 import asyncio
-
 import helpers.chatbot.util as util
 import helpers.chatbot.prompts as prompts
 from PIL import Image
@@ -17,7 +16,7 @@ load_dotenv()
 
 #helpers.sidebar.show()
 
-logo = "./images/paperpalooza.png"
+logo = "./images/profile_3135715.png"
 image = Image.open(logo)
 
 def get_image_as_base64(path):
@@ -47,6 +46,15 @@ def set_background_from_local_file(path):
     
 set_background_from_local_file('./images/chatbot_bg.png')
 
+st.markdown(f"""
+			<a href="/" style="color:white;text-decoration: none;">
+				<div style="display:table;margin-top:-15 rem;margin-left:0%; display: flex;">
+			  		<img src="{image_base64}" alt="PaperPalooza Logo" style="width:50px;height:40px;margin-left:750px; flex:2;" </img>
+					<span style="padding:10px; flex:2;">{st.session_state.username}</span>
+				</div>
+			</a>
+			<br>
+				""", unsafe_allow_html=True)
 
 st.write("Get instant answers to your (not too) specific coding questions.")
 
