@@ -94,8 +94,7 @@ def get_comments(parent_id=None):
 
     # Dynamic SQL query creation based on the number of emails
     placeholders = ', '.join(['%s'] * len(email_list))
-    print(email_list)
-    select_query = f"select cm.*, a.first_name from comments cm join (select first_name, email from user_details) as a on cm.user_email = a.email where email in ({placeholders})"
+    select_query = f"select cm.*, a.first_name from comments cm join (select first_name, email from user_details) as a on cm.user_email = a.email where email in ({placeholders}) and app = 'citation'"
     cur.execute(select_query ,email_list)
     
     return cur.fetchall()
@@ -153,9 +152,8 @@ def save_citation_to_db(user_id,title,date_saved_on, doc_type, format, citation)
         st.error(f"Failed to save citation: {e}")
         connection.rollback()
 
-def get_citations(userid):
-    print(userid)
-    select_query = f"select title, citation from citations where user_id= '{userid}'"
+def get_citations(userid, start_date, end_date):
+    select_query = f"select title, citation from citations where user_id= '{userid}' and date_saved_on >= '{start_date}' and date_saved_on <= '{end_date}'"
     cur.execute(select_query)
     citations = cur.fetchall()
     return citations
@@ -424,8 +422,15 @@ else:
     st.info('Enter a search term to begin.')
 
 st.subheader("Citation History:")
+st.write('Filter by Date:')
+today = datetime.today().date()
+col1, col2 = st.columns([4, 4])
+with col1:
+    start_date = st.date_input('Start date', today)
+with col2:
+    end_date = st.date_input('End date', today)
 user_id = get_user_id(st.session_state['username'])
-citations = get_citations(user_id)
+citations = get_citations(user_id, start_date, end_date)
 if citations:
     for title, citation_text in citations:
         col1, col2 = st.columns([8, 2])
