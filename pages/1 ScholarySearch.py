@@ -10,6 +10,8 @@ import base64
 from helpers import connection as conn
 from psycopg2 import IntegrityError
 import uuid
+import re
+from operator import itemgetter
 
 #helpers.sidebar.show()
 
@@ -154,12 +156,23 @@ if 'papers' not in st.session_state:
 
 if 'search_query' not in st.session_state:
     st.session_state['search_query'] = ''
+if 'sort_order' not in st.session_state:
+    st.session_state['sort_order'] = 'ascending'  # Default sort order
 
-def fetch_papers(search_query, start=0, max_results=10):
+# def fetch_papers(search_query, start=0, max_results=20):
+#     base_url = "http://export.arxiv.org/api/query?"
+#     query = f"search_query=all:{quote(search_query)}&start={start}&max_results={max_results}"
+#     response = requests.get(base_url + query)
+#     return response.text
+
+def fetch_papers(search_query, start=0, max_results=20):
+    # Clean search query by replacing special characters with space
+    sanitized_query = re.sub(r'[^\w\s-]', ' ', search_query)
     base_url = "http://export.arxiv.org/api/query?"
-    query = f"search_query=all:{quote(search_query)}&start={start}&max_results={max_results}"
+    query = f"search_query=all:{quote(sanitized_query)}&start={start}&max_results={max_results}"
     response = requests.get(base_url + query)
     return response.text
+
 
 def parse_response(response_text):
     feed = feedparser.parse(response_text)
@@ -169,19 +182,17 @@ def parse_response(response_text):
         papers.append({
             'title': entry.title,
             'authors': [author.name for author in entry.authors],
-            'published': f"Published: {published_date}",
+            'published': published_date,  # Simplified for sorting
             'pdf_link': entry.links[1].href,
             'arxiv_link': entry.id
         })
-    is_last_page = len(papers) < 10  # Adjust according to your max_results
+    is_last_page = len(papers) < 20
     return papers, is_last_page
 
 def update_results():
-    # Make sure to clamp the page number to 0 to avoid negative values
     st.session_state.page_number = max(0, st.session_state.page_number)
     response_text = fetch_papers(st.session_state.search_query, start=st.session_state.page_number)
     st.session_state.papers, st.session_state.is_last_page = parse_response(response_text)
-
 
 with st.form(key='search_form'):
     search_query = st.text_input('Search Research Papers', '')
@@ -189,29 +200,41 @@ with st.form(key='search_form'):
 
 if search_button and search_query:
     st.session_state.search_query = search_query
-    st.session_state.page_number = 0  # Reset to first page with new search
+    st.session_state.page_number = 0
     update_results()
 
 col1, col2, col3 = st.columns([1, 1, 5])
 
-with col1:
-    # Enable 'Previous' only if page_number is greater than 0
-    if st.session_state.page_number > 0:
-        if st.button('Previous'):
-            # Subtract from page_number and update results
-            st.session_state.page_number -= 10  # Assuming 10 is your max_results value
-            update_results()
+# with col1:
+#     if st.session_state.page_number > 0:
+#         if st.button('Previous'):
+#             st.session_state.page_number -= 20
+#             update_results()
+#     else:
+#         st.button('Previous', disabled=True)
+
+# with col2:
+#     if st.button('Next', disabled=st.session_state.is_last_page):
+#         st.session_state.page_number += 20
+#         update_results()
+
+# Toggle sort order function
+def toggle_sort_order():
+    if st.session_state['sort_order'] == 'ascending':
+        st.session_state.papers.sort(key=itemgetter('published'), reverse=True)
+        st.session_state['sort_order'] = 'descending'
     else:
-        # Optionally, display a disabled 'Previous' button for better UX
-        st.button('Previous', disabled=True)
+        st.session_state.papers.sort(key=itemgetter('published'), reverse=False)
+        st.session_state['sort_order'] = 'ascending'
 
-with col2:
-    # No change for 'Next' button logic
-    if st.button('Next', disabled=st.session_state.is_last_page):
-        st.session_state.page_number += 10
-        update_results()
-
+# Sort by Date button with toggle functionality
 if st.session_state.papers:
+    sort_button_label = "Sort by Date ↓" if st.session_state['sort_order'] == 'ascending' else "Sort by Date ↑"
+    if len(st.session_state.papers) > 2:
+        if st.button(sort_button_label):
+            toggle_sort_order()
+            st.rerun()
+
     for paper in st.session_state.papers:
         with st.container():
             st.markdown(f"""
@@ -223,6 +246,9 @@ if st.session_state.papers:
                     <a href="{paper['arxiv_link']}" target="_blank" style="color: #FF5733;">Arxiv</a>
                 </div>
             """, unsafe_allow_html=True)
+
+if 'input_key' not in st.session_state:
+    st.session_state.input_key = 0
 
 st.write(' ')
 with st.expander("See Comments"):
@@ -242,4 +268,3 @@ with st.expander("See Comments"):
             st.experimental_rerun()
         else:
             st.error("Failed to post comment.")
-
