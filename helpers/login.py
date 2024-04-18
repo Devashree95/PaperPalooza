@@ -47,8 +47,9 @@ def login_snippet(key="login"):
                     st.stop()
 
                 # If submit, fetch password from the database
-                cur.execute("SELECT password FROM users WHERE username = %s", (email,))
+                cur.execute("SELECT password, role FROM users WHERE username = %s", (email,))
                 password = cur.fetchone()[0]
+                role = cur.fetchone()[1]
                 
                 bytes = input_password.encode('utf-8')
                 hash = password
@@ -60,6 +61,7 @@ def login_snippet(key="login"):
                     st.session_state.user_logged_in = True
                     if "username" not in st.session_state:
                         st.session_state.username = email
+                    st.session_state["role"] = role
                     placeholder.empty()  # Clear the form
                     # You can redirect or continue execution here since the user is logged in
                     return True
@@ -80,6 +82,7 @@ def login_snippet(key="login"):
                 new_email = st.text_input("Email", key="new_email")  # Use unique key for new form
                 new_password = st.text_input("Password", type="password", key="new_password")  # Use unique key
                 name = st.text_input("Name", key="name")
+                advisor = st.checkbox("Are you an advisor?")
                 submit_account = st.form_submit_button("Create Account")
                 
             if st.button("Cancel"):
@@ -93,12 +96,17 @@ def login_snippet(key="login"):
                 salt = bcrypt.gensalt()
                 hash = bcrypt.hashpw(bytes, salt)
                 hash = hash.decode('utf-8')
+                role = "researcher"
+                if advisor:
+                    role = "advisor"
+                # Add role to execute query
 
                 try:
-                    cur.execute("INSERT INTO users (username, password, name) VALUES (%s, %s, %s)", (new_email, hash, name))
+                    cur.execute("INSERT INTO users (username, password, name, role) VALUES (%s, %s, %s, %s)", (new_email, hash, name, role))
                     connection.commit()
                     st.toast("Account created successfully")
                     st.session_state['username'] = new_email
+                    st.session_state['role'] = role
                     placeholder.empty()
                     st.session_state.user_logged_in = True
                     st.experimental_rerun()
