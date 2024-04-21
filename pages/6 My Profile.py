@@ -2,6 +2,7 @@ import streamlit as st
 import helpers.sidebar
 from PIL import Image
 import base64
+import bcrypt
 
 from helpers import connection as conn
 
@@ -141,3 +142,41 @@ with st.form("profile_form"):
     
     if submit_button:
         update_profile(first_name, last_name, email, dob, address, phone1, phone2)
+
+def change_password():
+    with st.form(key='change_password_form'):
+        st.markdown("#### Change your password")
+        old_password = st.text_input("Enter your old password", type="password", key="old_password")
+        new_password = st.text_input("Enter your new password", type="password", key="new_password")
+        confirm_password = st.text_input("Confirm your new password", type="password", key="confirm_password")
+        submit_change = st.form_submit_button("Change Password")
+        
+    if submit_change:
+        if new_password != confirm_password:
+            st.error("New password and confirmation do not match.")
+            return
+        
+        # Fetch the current hashed password from the database
+        cur.execute("SELECT password FROM users WHERE username = %s", (st.session_state['username'],))
+        current_hashed = cur.fetchone()[0]
+        
+        # Verify old password
+        if bcrypt.checkpw(old_password.encode('utf-8'), current_hashed.encode('utf-8')):
+            # Generate new hashed password
+            new_bytes = new_password.encode('utf-8')
+            new_salt = bcrypt.gensalt()
+            new_hash = bcrypt.hashpw(new_bytes, new_salt).decode('utf-8')
+            
+            # Update the database with the new password
+            try:
+                cur.execute("UPDATE users SET password = %s WHERE username = %s", (new_hash, st.session_state['username']))
+                connection.commit()
+                st.success("Password changed successfully.")
+            except Exception as e:
+                st.error(f"Error updating password: {e}")
+                print(f"Error updating password: {e}")
+        else:
+            st.error("Old password is incorrect.")
+
+change_password()
+
