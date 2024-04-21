@@ -131,7 +131,7 @@ with st.form("profile_form"):
     first_name = st.text_input("First Name", value=profile["first_name"])
     last_name = st.text_input("Last Name", value=profile["last_name"])
     email = st.text_input("Email", value=profile["email"])
-    dob = st.text_input("Date of Birth", value=profile["dob"])
+    dob = st.date_input("Date of Birth", value=profile["dob"])
     address = st.text_input("Address", value=profile["address"])
     phone1 = st.text_input("Phone 1", value=profile["phone1"])
     phone2 = st.text_input("Phone 2", value=profile["phone2"])

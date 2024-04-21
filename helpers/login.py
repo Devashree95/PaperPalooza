@@ -1,6 +1,7 @@
 import streamlit as st
 from helpers import connection as conn
 import bcrypt
+import uuid
 
 
 connection = conn.pgsql_connect()
@@ -80,28 +81,33 @@ def login_snippet(key="login"):
                 new_email = st.text_input("Email", key="new_email")  # Use unique key for new form
                 new_password = st.text_input("Password", type="password", key="new_password")  # Use unique key
                 name = st.text_input("Name", key="name")
+                parts = name.split(' ')
+                first_name = parts[0]
+                last_name = parts[1] if len(parts) > 1 else '' 
                 submit_account = st.form_submit_button("Create Account")
                 
             if st.button("Cancel"):
                 # Reset the relevant session states to display the login form again
                 st.session_state.show_login = True
                 st.session_state.button_clicked = False
-                st.experimental_rerun()
+                st.rerun()
 
             if submit_account:
                 bytes = new_password.encode('utf-8')
                 salt = bcrypt.gensalt()
                 hash = bcrypt.hashpw(bytes, salt)
                 hash = hash.decode('utf-8')
+                user_id = uuid.uuid4()
 
                 try:
                     cur.execute("INSERT INTO users (username, password, name) VALUES (%s, %s, %s)", (new_email, hash, name))
+                    cur.execute(f"insert into user_details values('{user_id}','{first_name}', '{last_name}', '{new_email}', Null , '', '' )")
                     connection.commit()
                     st.toast("Account created successfully")
                     st.session_state['username'] = new_email
                     placeholder.empty()
                     st.session_state.user_logged_in = True
-                    st.experimental_rerun()
+                    st.rerun()
                     return True
                     # st.session_state.show_login = True
                     # placeholder.empty()

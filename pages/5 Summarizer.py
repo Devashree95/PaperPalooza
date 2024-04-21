@@ -60,12 +60,20 @@ def get_email_list():
     if user_type == 'advisor':
         select_query = f"select student_email, advisor_email from advisor_student where advisor_email= '{st.session_state.username}'"
         cur.execute(select_query)
-        return cur.fetchall()[0]
+        res = cur.fetchall()
+        if len(res) > 0:
+            return res[0]
+        else:
+            return ''
     else:
         select_query = f"select advisor_email, student_email from advisor_student where student_email= '{st.session_state.username}'"
         cur.execute(select_query)
-        return cur.fetchall()[0]
-
+        res = cur.fetchall()
+        if len(res) > 0:
+            return res[0]
+        else:
+            return ''
+        
 def post_comment(comment_text):
     """
     Save the comment to a database.
@@ -90,6 +98,8 @@ def get_comments(parent_id=None):
     Returns a list of comments, where each comment is a dict with keys 'id', 'text', and 'replies'.
     """
     emails = get_email_list()
+    if emails == '':
+        return ''
     # Convert tuple to a list for easier manipulation if needed
     email_list = list(emails)
 
@@ -103,6 +113,9 @@ def get_comments(parent_id=None):
 def display_comments_section():
     # Fetch top-level comments
     comments = get_comments()
+    if comments == '':
+        st.write("No Comments to display")
+        return
     col1, col2 = st.columns([8, 2])
     # Display each citation
     for comment in comments:
@@ -119,7 +132,7 @@ def display_comments_section():
             st.write(' ')
             if st.button("Delete", key=f"delete_{comment_key}"):
                 delete_comment(comment_key)
-                st.experimental_rerun()
+                st.rerun()
             st.markdown("---")
 
 
@@ -296,6 +309,6 @@ with st.expander("See Comments"):
             st.success("Comment posted successfully!")
             # Increment the key to reset the input box
             st.session_state.input_key += 1
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Failed to post comment.")
