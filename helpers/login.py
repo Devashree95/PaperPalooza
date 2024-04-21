@@ -40,33 +40,40 @@ def login_snippet(key="login"):
             if submit:
                 st.session_state['username'] = email
                 # If submit, check if the email exists in the database
-                cur.execute("SELECT EXISTS (SELECT 1 FROM users WHERE username = %s)", (email,))
-                email_exists = cur.fetchone()
-                if not email_exists[0]:
-                    st.toast("Invalid username")
-                    st.stop()
+                try:
+                    cur.execute("SELECT EXISTS (SELECT 1 FROM users WHERE username = %s)", (email,))
+                    email_exists = cur.fetchone()
+                    if not email_exists[0]:
+                        st.toast("Invalid username")
+                        st.stop()
 
-                # If submit, fetch password from the database
-                cur.execute("SELECT password FROM users WHERE username = %s", (email,))
-                password = cur.fetchone()[0]
+                    # If submit, fetch password from the database
+                    cur.execute("SELECT password FROM users WHERE username = %s", (email,))
+                    password = cur.fetchone()[0]
+                    
+                    bytes = input_password.encode('utf-8')
+                    hash = password
+                    hash = hash.encode()
+                    result = bcrypt.checkpw(bytes, hash)
+
+                    if result:
+                        st.toast("Login successful")
+                        st.session_state.user_logged_in = True
+                        if "username" not in st.session_state:
+                            st.session_state.username = email
+                        placeholder.empty()  # Clear the form
+                        # You can redirect or continue execution here since the user is logged in
+                        return True
+
+                    else:
+                        st.toast("Login failed, incorrect password")
+                        st.stop()
                 
-                bytes = input_password.encode('utf-8')
-                hash = password
-                hash = hash.encode()
-                result = bcrypt.checkpw(bytes, hash)
-
-                if result:
-                    st.toast("Login successful")
-                    st.session_state.user_logged_in = True
-                    if "username" not in st.session_state:
-                        st.session_state.username = email
-                    placeholder.empty()  # Clear the form
-                    # You can redirect or continue execution here since the user is logged in
-                    return True
-
-                else:
-                    st.toast("Login failed, incorrect password")
+                except Exception as e:
+                    st.error(f"Error: {e}")
+                    print(f"Error: {e}")
                     st.stop()
+
             if not st.session_state.button_clicked:
                 create_account_button = st.button("Create new account", on_click=handle_click)
                 if create_account_button:
