@@ -37,7 +37,14 @@ def set_background_from_local_file(path):
     st.markdown(css, unsafe_allow_html=True)
         
 set_background_from_local_file('./images/grammar_background.png')
-        
+
+def create_project(project_name, username):
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO Projects (ProjectName) VALUES (%s) RETURNING ProjectID;", (project_name,))
+    project_id = cursor.fetchone()[0]
+    cursor.execute("INSERT INTO UserProjects (Username, ProjectID) VALUES (%s, %s);", (username, project_id))
+    conn.commit()
+    cursor.close()
         
         
 image_base64 = get_image_as_base64(logo)
@@ -71,4 +78,15 @@ if projects:
     st.table(projects)
 else:
     st.write("No Projects found for", username)
+
+
+st.header("Create new project")
+
+new_project_name = st.text_input("Enter project name:")
+
+if st.button("Create Project"):
+    if new_project_name:
+        create_project(new_project_name, username)
+    else:
+        st.warning("Please enter a project name.")
 
