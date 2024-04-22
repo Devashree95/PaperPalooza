@@ -1,6 +1,7 @@
 import streamlit as st
 from helpers import connection as conn
 import bcrypt
+import uuid
 
 
 connection = conn.pgsql_connect()
@@ -40,35 +41,40 @@ def login_snippet(key="login"):
             if submit:
                 st.session_state['username'] = email
                 # If submit, check if the email exists in the database
-                cur.execute("SELECT EXISTS (SELECT 1 FROM users WHERE username = %s)", (email,))
-                email_exists = cur.fetchone()
-                if not email_exists[0]:
-                    st.toast("Invalid username")
-                    st.stop()
+                try:
+                    cur.execute("SELECT EXISTS (SELECT 1 FROM users WHERE username = %s)", (email,))
+                    email_exists = cur.fetchone()
+                    if not email_exists[0]:
+                        st.toast("Invalid username")
+                        st.stop()
 
-                # If submit, fetch password from the database
-                cur.execute("SELECT password, role FROM users WHERE username = %s", (email,))
-                password = cur.fetchone()[0]
-                role = cur.fetchone()[1]
+                    # If submit, fetch password from the database
+                    cur.execute("SELECT password FROM users WHERE username = %s", (email,))
+                    password = cur.fetchone()[0]
+                    
+                    bytes = input_password.encode('utf-8')
+                    hash = password
+                    hash = hash.encode()
+                    result = bcrypt.checkpw(bytes, hash)
+
+                    if result:
+                        st.toast("Login successful")
+                        st.session_state.user_logged_in = True
+                        if "username" not in st.session_state:
+                            st.session_state.username = email
+                        placeholder.empty()  # Clear the form
+                        # You can redirect or continue execution here since the user is logged in
+                        return True
+
+                    else:
+                        st.toast("Login failed, incorrect password")
+                        st.stop()
                 
-                bytes = input_password.encode('utf-8')
-                hash = password
-                hash = hash.encode()
-                result = bcrypt.checkpw(bytes, hash)
-
-                if result:
-                    st.toast("Login successful")
-                    st.session_state.user_logged_in = True
-                    if "username" not in st.session_state:
-                        st.session_state.username = email
-                    st.session_state["role"] = role
-                    placeholder.empty()  # Clear the form
-                    # You can redirect or continue execution here since the user is logged in
-                    return True
-
-                else:
-                    st.toast("Login failed, incorrect password")
+                except Exception as e:
+                    st.error(f"Error: {e}")
+                    print(f"Error: {e}")
                     st.stop()
+
             if not st.session_state.button_clicked:
                 create_account_button = st.button("Create new account", on_click=handle_click)
                 if create_account_button:
@@ -83,13 +89,16 @@ def login_snippet(key="login"):
                 new_password = st.text_input("Password", type="password", key="new_password")  # Use unique key
                 name = st.text_input("Name", key="name")
                 advisor = st.checkbox("Are you an advisor?")
+                parts = name.split(' ')
+                first_name = parts[0]
+                last_name = parts[1] if len(parts) > 1 else '' 
                 submit_account = st.form_submit_button("Create Account")
                 
             if st.button("Cancel"):
                 # Reset the relevant session states to display the login form again
                 st.session_state.show_login = True
                 st.session_state.button_clicked = False
-                st.experimental_rerun()
+                st.rerun()
 
             if submit_account:
                 bytes = new_password.encode('utf-8')
@@ -103,13 +112,22 @@ def login_snippet(key="login"):
 
                 try:
                     cur.execute("INSERT INTO users (username, password, name, role) VALUES (%s, %s, %s, %s)", (new_email, hash, name, role))
+                    user_id = uuid.uuid4()
+                except Exception as e:
+                    st.error(f"Error: {e}")
+                    print(f"Error: {e}")
+                    st.stop()
+
+                try:
+                    cur.execute("INSERT INTO users (username, password, name) VALUES (%s, %s, %s)", (new_email, hash, name))
+                    cur.execute(f"insert into user_details values('{user_id}','{first_name}', '{last_name}', '{new_email}', Null , '', '' )")
                     connection.commit()
                     st.toast("Account created successfully")
                     st.session_state['username'] = new_email
                     st.session_state['role'] = role
                     placeholder.empty()
                     st.session_state.user_logged_in = True
-                    st.experimental_rerun()
+                    st.rerun()
                     return True
                     # st.session_state.show_login = True
                     # placeholder.empty()

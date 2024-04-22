@@ -20,6 +20,3 @@ def pgsql_connect():
     
     except Exception as e:
         print(f"Unable to connect to the database: {e}")
-
-connection = pgsql_connect()
-cur = connection.cursor()
