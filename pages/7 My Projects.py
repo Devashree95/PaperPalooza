@@ -39,12 +39,11 @@ def set_background_from_local_file(path):
 set_background_from_local_file('./images/grammar_background.png')
 
 def create_project(project_name, username):
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO Projects (ProjectName) VALUES (%s) RETURNING ProjectID;", (project_name,))
-    project_id = cursor.fetchone()[0]
-    cursor.execute("INSERT INTO UserProjects (Username, ProjectID) VALUES (%s, %s);", (username, project_id))
-    conn.commit()
-    cursor.close()
+    cur.execute("INSERT INTO Projects (title) VALUES (%s) RETURNING id;", (project_name,))
+    project_id = cur.fetchone()[0]
+    cur.execute("INSERT INTO userprojects (username, projectid) VALUES (%s, %s);", (username, project_id))
+    connection.commit()
+    cur.close()
         
         
 image_base64 = get_image_as_base64(logo)
@@ -66,7 +65,6 @@ username = st.session_state.username
 cur.execute("""SELECT * FROM projects JOIN UserProjects ON projects.id = UserProjects.projectID JOIN users on UserProjects.username = users.username WHERE users.username = %s;""", (username,))
 
 projects = cur.fetchall()
-cur.close()
 
 
 
