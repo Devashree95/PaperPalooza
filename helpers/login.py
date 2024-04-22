@@ -49,17 +49,19 @@ def login_snippet(key="login"):
                         st.stop()
 
                     # If submit, fetch password from the database
-                    cur.execute("SELECT password FROM users WHERE username = %s", (email,))
-                    password = cur.fetchone()[0]
+                    cur.execute("SELECT password, role FROM users WHERE username = %s", (email,))
+                    data = cur.fetchone()
+                    password = data[0]
+                    role = data[1]
                     
                     bytes = input_password.encode('utf-8')
                     hash = password
                     hash = hash.encode()
                     result = bcrypt.checkpw(bytes, hash)
-
                     if result:
                         st.toast("Login successful")
                         st.session_state.user_logged_in = True
+                        st.session_state['role'] = role
                         if "username" not in st.session_state:
                             st.session_state.username = email
                         placeholder.empty()  # Clear the form
