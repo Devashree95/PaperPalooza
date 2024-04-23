@@ -49,17 +49,19 @@ def login_snippet(key="login"):
                         st.stop()
 
                     # If submit, fetch password from the database
-                    cur.execute("SELECT password FROM users WHERE username = %s", (email,))
-                    password = cur.fetchone()[0]
+                    cur.execute("SELECT password, role FROM users WHERE username = %s", (email,))
+                    data = cur.fetchone()
+                    password = data[0]
+                    role = data[1]
                     
                     bytes = input_password.encode('utf-8')
                     hash = password
                     hash = hash.encode()
                     result = bcrypt.checkpw(bytes, hash)
-
                     if result:
                         st.toast("Login successful")
                         st.session_state.user_logged_in = True
+                        st.session_state['role'] = role
                         if "username" not in st.session_state:
                             st.session_state.username = email
                         placeholder.empty()  # Clear the form
@@ -88,6 +90,7 @@ def login_snippet(key="login"):
                 new_email = st.text_input("Email", key="new_email")  # Use unique key for new form
                 new_password = st.text_input("Password", type="password", key="new_password")  # Use unique key
                 name = st.text_input("Name", key="name")
+                advisor = st.checkbox("Are you an advisor?")
                 parts = name.split(' ')
                 first_name = parts[0]
                 last_name = parts[1] if len(parts) > 1 else '' 
@@ -104,7 +107,18 @@ def login_snippet(key="login"):
                 salt = bcrypt.gensalt()
                 hash = bcrypt.hashpw(bytes, salt)
                 hash = hash.decode('utf-8')
-                user_id = uuid.uuid4()
+                role = "researcher"
+                if advisor:
+                    role = "advisor"
+                # Add role to execute query
+
+                try:
+                    cur.execute("INSERT INTO users (username, password, name, role) VALUES (%s, %s, %s, %s)", (new_email, hash, name, role))
+                    user_id = uuid.uuid4()
+                except Exception as e:
+                    st.error(f"Error: {e}")
+                    print(f"Error: {e}")
+                    st.stop()
 
                 try:
                     cur.execute("INSERT INTO users (username, password, name) VALUES (%s, %s, %s)", (new_email, hash, name))
@@ -112,6 +126,7 @@ def login_snippet(key="login"):
                     connection.commit()
                     st.toast("Account created successfully")
                     st.session_state['username'] = new_email
+                    st.session_state['role'] = role
                     placeholder.empty()
                     st.session_state.user_logged_in = True
                     st.rerun()
