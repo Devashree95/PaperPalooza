@@ -9,7 +9,7 @@ import time
 load_dotenv()
 import fitz
 import openai
-from nltk.tokenize import sent_tokenize
+from chatgptmax import send
 from io import StringIO
 import uuid
 from psycopg2 import IntegrityError
@@ -24,11 +24,10 @@ st.set_page_config(
 
 #helpers.sidebar.show()
 
-# Streamlit UI setup
-
 connection = conn.pgsql_connect()
 cur = connection.cursor()
 
+# Streamlit UI setup
 def get_base64_of_file(path):
     with open(path, "rb") as file:
         return base64.b64encode(file.read()).decode()
@@ -174,89 +173,34 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 st.title("Text Summarizer") 
 
 def read_pdf(file):
-    context = ""
     with fitz.open(stream=file.read(), filetype="pdf") as pdf_file:
-        num_pages = pdf_file.page_count
-        for page_num in range(num_pages):
-                page = pdf_file[page_num]
-                page_text = page.get_text()
-                context += page_text
-    return context
-
-def split_text(text, chunk_size=5000):
-  chunks = []
-  current_chunk = StringIO()
-  current_size = 0
-  sentences = sent_tokenize(text)
-  for sentence in sentences:
-    sentence_size = len(sentence)
-    if sentence_size > chunk_size:
-      while sentence_size > chunk_size:
-        chunk = sentence[:chunk_size]
-        chunks.append(chunk)
-        sentence = sentence[chunk_size:]
-        sentence_size -= chunk_size
-        current_chunk = StringIO()
-        current_size = 0
-    if current_size + sentence_size < chunk_size:
-      current_chunk.write(sentence)
-      current_size += sentence_size
-    else:
-      chunks.append(current_chunk.getvalue())
-      current_chunk = StringIO()
-      current_size = 0
-      current_chunk.write(sentence)
-      current_size = sentence_size
-  if current_chunk.getvalue():
-     chunks.append(current_chunk.getvalue())
-  return chunks
-  
-
-def gpt3_completion(prompt, model='gpt-3.5-turbo', temp=0.5, top_p=0.3, tokens=1000):
-    #st.write("Calling GPT-3 API...")
-    prompt = prompt.encode(encoding='ASCII',errors='ignore').decode()
-    try:
-        response = openai.chat.completions.create(
-       messages=[
-        {
-            "role": "system",
-            "content": prompt,
-        }
-            ],
-        model=model,
-        temperature=temp,
-        top_p=top_p,
-        max_tokens=tokens,
-        stop=None
-        )
-        #st.write("API Response:", response)
-        summary_text = response.choices[0].message.content.strip()
-        #st.write("Summary:", summary_text)
-        return summary_text
-    except Exception as oops:
-        st.error(f"GPT-3 error: {oops}")
-        return f"GPT-3 error: {oops}"
+            num_pages = pdf_file.page_count
+            for page_num in range(num_pages):
+                    page = pdf_file[page_num]
+                    page_text = page.get_text()
+    return page_text
 
 
 def summarize(doc):
-  with st.spinner(text="Summarizing..."):
-    chunks = split_text(doc)
-    #st.write("Chunks:",chunks)
-    summaries = []
-    for chunk in chunks:
-        prompt = "Please summarize the following document in 2 sentences: \n"
-        summary = gpt3_completion(prompt + chunk)
-        if summary.startswith("GPT-3 error:"):
-            continue
-        summaries.append(summary)
-    return ' '.join(summaries)
+    with st.spinner(text="Summarizing..."):
+        prompt_text = "Can you summarize entire text in 2 to 3 sentences?"
+        responses = send(prompt=prompt_text, text_data=doc)
+        summary = ""
+        for response in responses:
+                    if isinstance(response, str):
+                        summary += response + "\n"
+                    elif hasattr(response, 'content') and isinstance(response.content, str):
+                        summary += response.content + "\n"
+                    else:
+                        st.warning("Received response that cannot be processed.")    
+        return summary
+      
 
 document = st.file_uploader("Choose a PDF file", type=["pdf"])
-#st.write(document)
 
 if st.button("Summarize File"):
     if not document:
-        st.warning("Please upload pdf")
+        st.warning("Please upload a PDF!")
     else:
         docs = read_pdf(document)
         summary_text = summarize(docs)
@@ -272,7 +216,7 @@ def text_input(text):
     data = {
             "model": "gpt-4",
             "messages": [
-                {"role": "system", "content": "Please summarize the following text input in atleast 150 words:\n"},
+                {"role": "system", "content": "Please summarize the following text in 2 to 3 sentences:\n"},
                 {"role": "user", "content": text},
             ],
         }
@@ -283,13 +227,13 @@ def text_input(text):
         suggestions = result.get("choices", [])[0].get("message", {}).get("content", "").strip()
         return suggestions
     else:
-        print(response.text)  # For debugging purposes
+        print(response.text)
         return ["There was an error summarizing the text."]
   
 text = st.text_area("Enter text to summarize:", height=250)
 if st.button("Summarize Text"):
         if not text:
-            st.warning("Please input text")
+            st.warning("Please input text!")
         else:
             with st.spinner(text="Summarizing..."):
                 suggestions = text_input(text)
