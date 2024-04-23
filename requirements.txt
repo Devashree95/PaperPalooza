@@ -9,6 +9,7 @@ streamlit_option_menu
 python-dotenv
 openai
 PyMuPDF
-nltk
 psycopg2-binary
 bcrypt
+chatgptmax
+tiktoken
