@@ -29,6 +29,9 @@ def get_image_as_base64(path):
 #helpers.sidebar.show()
 image_base64 = get_image_as_base64(logo)
 
+if 'input_key' not in st.session_state:
+    st.session_state.input_key = 0
+
 st.markdown(f"""
 			<a href="/" style="color:white;text-decoration: none;">
 				<div style="display:table;margin-top:-15 rem;margin-left:0%; display: flex;">
@@ -172,7 +175,7 @@ def extract_text_from_pdf(file):
 # Updated function to check grammar using GPT-4 API and the chat endpoint
 def check_grammar(text):
     api_url = "https://api.openai.com/v1/chat/completions"
-    api_key = os.getenv("GPT_API_KEY")  # Replace with your actual API key
+    api_key = os.getenv('OPENAI_API_KEY')
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",

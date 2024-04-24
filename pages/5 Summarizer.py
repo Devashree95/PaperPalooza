@@ -27,6 +27,9 @@ st.set_page_config(
 connection = conn.pgsql_connect()
 cur = connection.cursor()
 
+if 'input_key' not in st.session_state:
+    st.session_state.input_key = 0
+
 # Streamlit UI setup
 def get_base64_of_file(path):
     with open(path, "rb") as file:
