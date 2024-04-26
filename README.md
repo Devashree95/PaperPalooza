@@ -21,6 +21,14 @@ management. Targeted at students, researchers, and academics, Paper Palooza
 aims to simplify and enhance the efficiency of navigating the vast landscape of
 academic literature
 
+# Features:
+1. A Web based platform​ designed to streamline academic research​
+2. Offers AI-powered paper summarization​
+3. Integrated research paper search​
+4. Grammar Checker
+5. Personalized citation management tools​
+
+AI powered research assistant chatbot​
 # Installation
 Clone the Repository: git clone https://version.cs.vt.edu/kanadn/paperpalooza.git <br>
 Install Dependencies: pip install -r requirements.txt <br>
