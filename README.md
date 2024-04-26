@@ -26,3 +26,6 @@ Clone the Repository: git clone https://version.cs.vt.edu/kanadn/paperpalooza.gi
 Install Dependencies: pip install -r requirements.txt <br>
 PostgreSQL details: The DB connection details are in .env file. <br>
 Run the Application: streamlit run .\Paperpalooza_Home.py <br>
+
+# Domain Model:
+![Domain Model](/images/Domain_Model1.png)
