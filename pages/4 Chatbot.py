@@ -56,7 +56,7 @@ st.markdown(f"""
 			<br>
 				""", unsafe_allow_html=True)
 
-st.write("Get instant answers to your (not too) specific coding questions.")
+st.write("Get instant answers to your (not too) specific questions...")
 
 
 # Ensure the session state is initialized
