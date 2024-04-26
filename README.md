@@ -24,5 +24,5 @@ academic literature
 # Installation
 Clone the Repository: git clone https://version.cs.vt.edu/kanadn/paperpalooza.git <br>
 Install Dependencies: pip install -r requirements.txt <br>
-Set up PostgreSQL: Ensure you have PostgreSQL installed and running. The schema and sql dump files are added in '/data' foder. Import these files to set up local db. Update the database connection details in .env file. <br>
+PostgreSQL details: The DB connection details are in .env file. <br>
 Run the Application: streamlit run .\Paperpalooza_Home.py <br>
