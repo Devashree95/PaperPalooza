@@ -27,8 +27,8 @@ academic literature
 3. Integrated research paper search​
 4. Grammar Checker
 5. Personalized citation management tools​
+6. AI powered research assistant chatbot​
 
-AI powered research assistant chatbot​
 # Installation
 Clone the Repository: git clone https://version.cs.vt.edu/kanadn/paperpalooza.git <br>
 Install Dependencies: pip install -r requirements.txt <br>
