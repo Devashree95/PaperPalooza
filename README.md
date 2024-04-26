@@ -28,4 +28,4 @@ PostgreSQL details: The DB connection details are in .env file. <br>
 Run the Application: streamlit run .\Paperpalooza_Home.py <br>
 
 # Domain Model:
-![Domain Model](/images/Domain_Model1.png)
+![Domain Model](/images/Domain_Model__1_.png)
