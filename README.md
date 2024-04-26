@@ -1,6 +1,13 @@
 # Paperpalooza
 
-Chech out our live demo [here](https://paperpalooza.discovery.cs.vt.edu/)
+Check out our live demo [here](https://paperpalooza.discovery.cs.vt.edu/)
+
+# Team Members:
+Devashree Bhagwat​ (devashreeb@vt.edu) <br>
+Kanad Naleshwarkar​ (kanadn@vt.edu) <br>
+Ritish Shailly (rshailly@vt.edu) <br>
+Vivek Murali (mvivek@vt.edu) <br>
+Sanket Bhujbal (sanketb@vt.edu)
 
 # Overview:
 Paper Palooza is a forthcoming innovative web application planned to transform
