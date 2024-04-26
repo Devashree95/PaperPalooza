@@ -17,9 +17,6 @@ WORKDIR /app/paperpalooza
 
 RUN pip install -r requirements.txt
 
-# Temporary fix for nltk punkt download
-RUN python -c 'import nltk; nltk.download("punkt")' 
-
 EXPOSE 8502
 
 HEALTHCHECK CMD curl --fail http://localhost:8502/_stcore/health
