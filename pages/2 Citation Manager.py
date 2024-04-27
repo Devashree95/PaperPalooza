@@ -88,7 +88,7 @@ def get_user_ids():
         cur.execute(select_query)
         res = cur.fetchall()
         if len(res) > 0:
-            return res[0]
+            return res
         else:
             return ''
 

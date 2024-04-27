@@ -159,7 +159,7 @@ def change_password():
         # Fetch the current hashed password from the database
         cur.execute("SELECT password FROM users WHERE username = %s", (st.session_state['username'],))
         current_hashed = cur.fetchone()[0]
-        
+        print(current_hashed.encode('utf-8'))
         # Verify old password
         if bcrypt.checkpw(old_password.encode('utf-8'), current_hashed.encode('utf-8')):
             # Generate new hashed password
