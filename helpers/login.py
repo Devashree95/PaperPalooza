@@ -121,7 +121,7 @@ def login_snippet(key="login"):
                     st.stop()
 
                 try:
-                    cur.execute("INSERT INTO users (username, password, name) VALUES (%s, %s, %s)", (new_email, hash, name))
+                    cur.execute("INSERT INTO users_v2 (username, password, name) VALUES (%s, %s, %s)", (new_email, hash, name))
                     cur.execute(f"insert into user_details values('{user_id}','{first_name}', '{last_name}', '{new_email}', Null , '', '{role}' )")
                     connection.commit()
                     st.toast("Account created successfully")
